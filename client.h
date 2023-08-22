@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QUdpSocket>
+#include <QFloat16>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Client; }

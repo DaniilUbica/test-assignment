@@ -23,16 +23,22 @@ void Client::readData() {
     quint16 server_port;
     quint8 x, v, m, s, p;
     qint8 y;
-    float a;
+    qfloat16 a;
     qint16 r;
 
     while (socket->hasPendingDatagrams()) {
+        quint16 second_word;
         QByteArray message;
         message.resize(socket->pendingDatagramSize());
         socket->readDatagram(message.data(), message.size(), &server, &server_port);
         QDataStream stream(message);
-        stream >> x >> y >> v >> m >> s >> a >> p >> r;
-        qDebug() << y << '\n';
+
+        stream >> x >> y >> second_word >> a >> p >> r;
+
+        s = (second_word >> 12) & 3;
+        m = (second_word >> 8) & 3;
+        v = second_word & 255;
+
         if (y == 32) {
             y = -32;
         }
@@ -40,14 +46,13 @@ void Client::readData() {
             y = y ^ (1 << 5);
             y = -y;
         }
-        qDebug() << x << " " << y << " " << v << " " << m << " " << s << " " << a << " " << p << '\n';
 
         ui->x_data->setText(QString::number(x));
         ui->y_data->setText(QString::number(y));
         ui->v_data->setText(QString::number(v));
         ui->m_data->setText(QString::number(m));
         ui->s_data->setText(QString::number(s));
-        ui->a_data->setText(QString::number(a));
+        ui->a_data->setText(QString::number(round(a*10)/10));
         ui->p_data->setText(QString::number(p));
         ui->r_data->setText(QString::number(r));
     }
