@@ -33,6 +33,9 @@ void Server::sendData() {
     quint8 p = ui->p_edit->text().toInt();
     qint16 r(0);
 
+    int8_t coded_a = round(a*10)/10 * 10;
+    qDebug() << coded_a << "a\n";
+
     if (y < 0) {
         if (y != -32) {
             quint8 mask = 1 << 5;
@@ -55,15 +58,15 @@ void Server::sendData() {
         (r <<= 1) |= r_text[i].digitValue();
     }
 
-    qDebug() << sizeof(x) << sizeof(y) << sizeof(second_word) << sizeof(a) << sizeof(p) << sizeof(r) << "\n";
+    qDebug() << sizeof(x) << sizeof(y) << sizeof(second_word) << sizeof(coded_a) << sizeof(p) << sizeof(r) << "\n";
 
-    stream << x << y << second_word << a << p << r;
+    stream << x << y << second_word << coded_a << p << r;
     socket->writeDatagram(datagram, QHostAddress::LocalHost, send_port);
 }
 bool Server::checkData(int x, int y, int v, int m, int s, float a, int p) {
     if (x <= 63 && x >= 0 && y >=-32 && y <= 31 && v >= 0 && v <= 255 &&
             m >= 0 && m <= 3 && s >= 0 && s <= 3 && a >= -12.7
-            && a <= 12.8 && p >= 0 && p <= 130) {
+            && a < 12.9 && p >= 0 && p <= 130) {
         return true;
     }
     return false;
@@ -83,24 +86,6 @@ QString Server::paintSymbol(int idx) {
     return text;
 }
 
-quint8 Server::compressA(float a) {
-    int i = abs(int(a));
-    int f = abs(round(((abs(a) - abs(i)) * 10)*10)/10);
-
-    quint8 res = 0;
-
-    if (a < 0) {
-        res |= 1 << 7;
-        res |= int(i) << 3;
-        res |= int(f);
-    }
-    else {
-        res |= int(i) << 4;
-        res |= int(f);
-    }
-    return res;
-}
-
 void Server::on_send_button_clicked() {
     int x = ui->x_edit->text().toInt();
     int y = ui->y_edit->text().toInt();
@@ -109,7 +94,7 @@ void Server::on_send_button_clicked() {
     int s = ui->s_edit->text().toInt();
     float a = ui->a_edit->text().toFloat();
     int p = ui->p_edit->text().toInt();
-
+    qDebug() << a << "button a\n";
     if (checkData(x, y, v, m, s, a, p) && !ui->x_edit->text().isEmpty() && !ui->y_edit->text().isEmpty()
             && !ui->v_edit->text().isEmpty() && !ui->m_edit->text().isEmpty()
             && !ui->s_edit->text().isEmpty() && !ui->a_edit->text().isEmpty() && !ui->p_edit->text().isEmpty()) {

@@ -30,7 +30,6 @@ private:
     void sendData();
     bool checkData(int x, int y, int v, int m, int s, float a, int p);
     QString paintSymbol(int idx);
-    quint8 compressA(float a);
 
     const int R_BITS_AMOUNT = 16;
     Ui::Server *ui;

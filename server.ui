@@ -171,7 +171,7 @@
           <item>
            <widget class="QLineEdit" name="a_edit">
             <property name="text">
-             <string>3.1</string>
+             <string>12.8</string>
             </property>
            </widget>
           </item>
@@ -187,7 +187,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="p_edit"/>
+           <widget class="QLineEdit" name="p_edit">
+            <property name="text">
+             <string>12</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
