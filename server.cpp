@@ -34,7 +34,6 @@ void Server::sendData() {
     qint16 r(0);
 
     int8_t coded_a = round(a*10)/10 * 10;
-    qDebug() << coded_a << "a\n";
 
     if (y < 0) {
         if (y != -32) {
@@ -49,18 +48,27 @@ void Server::sendData() {
     m = m & 0x03;
     s = s & 0x03;
 
+    quint16 first_word = 0;
+    first_word |= y << 8;
+    first_word |= x;
+
     quint16 second_word = 0;
     second_word |= s << 12;
     second_word |= m << 8;
     second_word |= v;
 
+    quint16 third_word = 0;
+    third_word |= coded_a << 8;
+    third_word |= p;
+
+    qDebug() << third_word << "\n";
     for (int i = 0; i < R_BITS_AMOUNT; i++) {
         (r <<= 1) |= r_text[i].digitValue();
     }
 
-    qDebug() << sizeof(x) << sizeof(y) << sizeof(second_word) << sizeof(coded_a) << sizeof(p) << sizeof(r) << "\n";
+    qDebug() << "Packet size: " << sizeof(first_word) + sizeof(second_word) + sizeof(third_word) + sizeof(r) << "bytes\n";
 
-    stream << x << y << second_word << coded_a << p << r;
+    stream << first_word << second_word << third_word << r;
     socket->writeDatagram(datagram, QHostAddress::LocalHost, send_port);
 }
 bool Server::checkData(int x, int y, int v, int m, int s, float a, int p) {
@@ -94,19 +102,13 @@ void Server::on_send_button_clicked() {
     int s = ui->s_edit->text().toInt();
     float a = ui->a_edit->text().toFloat();
     int p = ui->p_edit->text().toInt();
-    qDebug() << a << "button a\n";
+
     if (checkData(x, y, v, m, s, a, p) && !ui->x_edit->text().isEmpty() && !ui->y_edit->text().isEmpty()
             && !ui->v_edit->text().isEmpty() && !ui->m_edit->text().isEmpty()
             && !ui->s_edit->text().isEmpty() && !ui->a_edit->text().isEmpty() && !ui->p_edit->text().isEmpty()) {
         sendData();
 
-        ui->x_edit->clear();
-        ui->y_edit->clear();
-        ui->v_edit->clear();
-        ui->m_edit->clear();
-        ui->s_edit->clear();
-        ui->a_edit->clear();
-        ui->p_edit->clear();
+
         ui->r_bits->setText("0000000000000000");
         r_text = "0000000000000000";
         curr_bit = 0;

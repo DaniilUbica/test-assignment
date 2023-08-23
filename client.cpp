@@ -27,22 +27,31 @@ void Client::readData() {
     qint16 r;
 
     while (socket->hasPendingDatagrams()) {
+        quint16 first_word;
         quint16 second_word;
+        quint16 third_word;
+
         QByteArray message;
         message.resize(socket->pendingDatagramSize());
         socket->readDatagram(message.data(), message.size(), &server, &server_port);
         QDataStream stream(message);
 
-        stream >> x >> y >> second_word >> a >> p >> r;
+        stream >> first_word >> second_word >> third_word >> r;
+
+        y = (first_word >> 8) & 63;
+        x = first_word & 63;
+
+        s = (second_word >> 12) & 3;
+        m = (second_word >> 8) & 3;
+        v = second_word & 255;
+
+        a = (third_word >> 8) & 255;
+        p = third_word & 255;
 
         qfloat16 encoded_a = int(a) / 10.0;
         if (int(a) == -128) {
             encoded_a *= -1.0;
         }
-
-        s = (second_word >> 12) & 3;
-        m = (second_word >> 8) & 3;
-        v = second_word & 255;
 
         if (y == 32) {
             y = -32;
